@@ -15,7 +15,7 @@ All you have to do to be able to use this project is copy the contents of [src/M
 The result will be something like this (keep in mind the code itself may change with future versions):
 ![LinqPadMyExtensionsWithLinqPadMiniUnitTests](imgs/LinqPadMyExtensionsWithLinqPadMiniUnitTests.png)
 
-Once you **save** it, either LinqPad will tell you **Query compiled successfully** or there will be an error that a file could not be acessed. If this is the case, please close all queries that you have open, and then make any change to your **My Extensions** (press space and then backspace), and **save** again.
+Once you **save** it, either LinqPad will tell you **Query compiled successfully** or there will be an error that a file could not be accessed. If this is the case, please close all queries that you have open, and then make any change to your **My Extensions** (press space and then backspace), and **save** again.
 
 You are now ready to use **LinqPad Mini Unit Tests**
 
@@ -129,4 +129,4 @@ I want to thank [TFV](http://www.tfv.pt) for getting me hooked on LinqPad and gi
 * Use attributes to mark functions as tests (like MSTest [TestMethod] attribute);
 * Create an Assert class/namespace to facilitate asserts (like every unit test framework has!);
 * Allow Tests to explicitly fail with an exception (like MSTest [ExpectedException] attribute);
-* Come up with a way to capture the console output for each test separetly;
+* Come up with a way to capture the console output for each test separately;
