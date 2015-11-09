@@ -29,7 +29,7 @@ public class Test_UnitTests : IUnitTests {
 		Assert.AreNotEqual(notExpected: "xpto", actual: someString);
 	}
 	
-	[Test]
+	[Test(ShouldTestFail=true)]
 	public void Test_AssertFail() {
 		// Assert
 		Assert.Fail("This test should fail!");
@@ -41,6 +41,11 @@ public class Test_UnitTests : IUnitTests {
 		throw new Exception("This exception is expected! This test should pass.");
 		// Assert
 		Assert.Fail("This test should not have failed, the exception was expected");
+	}
+	
+	[Test(ExpectedExceptionType=typeof(Exception), ShouldTestFail=true)]
+	public void Test_FailIf_ExpectedExceptionIsNotThrown() {
+		// Nothing to do, this test should fail because no exception was thrown
 	}
 }
 
