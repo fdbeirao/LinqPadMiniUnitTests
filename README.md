@@ -20,37 +20,18 @@ Once you **save** it, either LinqPad will tell you **Query compiled successfully
 You are now ready to use **LinqPad Mini Unit Tests**
 
 ## Easy usage
-In order for you to use **LinqPad Mini Unit Tests** you should create any class on your code, make it implement the interface **IUnitTests** and return a list of **Test** objects.
-* Each **Test** may or may not have a name;
-* Each **Test** should have some **Code** to be run;
-* The **Code** a **Test** runs will return a **string**: empty string for **Success** and a non-empty string for failure. The content of the non-empty string is the failure reason;
+In order for you to use **LinqPad Mini Unit Tests** you should create a class on your code and make it implement the interface **IUnitTests**.
 
 First the class that will contain our tests with the minimal implementation of **IUnitTests**:
 ```csharp
-public class MyTests : IUnitTests {
-	public List<Test> Tests { 
-		get { 
-			return new List<Test>(); 
-		}
-	}
-}
+public class MyTests : IUnitTests { }
 ```
 
-Second we write a unit test:
+Second we write a unit test. Notice it should have the **[Test]** attribute:
 ```csharp
 public class MyTests : IUnitTests {
-	public List<Test> Tests { 
-		get { 
-			return new List<Test> { 
-				new Test {
-					Name = "My first test",
-					Code = MyFirstTest,
-				}
-			}; 
-		}
-	}
-	
-	private string MyFirstTest() {
+	[Test]
+	public void MyFirstTest() {
 		// Setup
 		var a = 4;
 		var b = 5;
@@ -59,10 +40,7 @@ public class MyTests : IUnitTests {
 		var result = a + b;
 		
 		// Assert
-		if (result == 9)
-			return string.Empty;
-		else
-			return string.Format("Unexpected result: {0}", result);
+		Assert.AreEqual(expected: 9, actual: result);
 	}
 }
 ```
@@ -81,52 +59,62 @@ And there you go, this will be the output:
 
 The test runner will also provide you with the execution times and outcomes. For example:
 ```csharp
-public class MyTests : IUnitTests {
-	public List<Test> Tests { 
-		get { 
-			return new List<Test> {
-				new Test { 
-					Name = "Test one", 
-					Code = AlwaysSucceed,
-				},
-				new Test {
-					Name = "Test without code",
-				},
-				new Test {
-					Name = "Some error!",
-					Code = AlwaysFail,
-				},
-				new Test {
-					Name = "Slow running test",
-					Code = SlowRunningTest,
-				},
-			};
-		}
+void Main() {
+	new Test_UnitTests().RunTests();
+}
+
+public class Test_UnitTests : IUnitTests {
+	[Test]
+	public void Test_AreEqual() {
+		// Setup
+		var someString = "foo";
+		// Act
+		someString += "bar";
+		// Assert
+		Assert.AreEqual(expected: "foobar", actual: someString);
 	}
 	
-	private string AlwaysSucceed() {
-		return string.Empty;
+	[Test]
+	public void Test_AreNotEqual() {
+		// Setup
+		var someString = "foo";
+		// Act
+		someString += "bar";
+		// Assert
+		Assert.AreNotEqual(notExpected: "xpto", actual: someString);
 	}
 	
-	private string AlwaysFail() {
-		return "Why must I always fail?";
+	[Test(ShouldTestFail=true)]
+	public void Test_AssertFail() {
+		// Assert
+		Assert.Fail("This test should fail!");
 	}
 	
-	private string SlowRunningTest() {
-		Thread.Sleep(TimeSpan.FromSeconds(1));
-		return string.Empty;
+	[Test(ExpectedExceptionType=typeof(Exception))]
+	public void Test_ExpectedException() {
+		// Act
+		throw new Exception("This exception is expected! This test should pass.");
+		// Assert
+		Assert.Fail("This test should not have failed, the exception was expected");
+	}
+	
+	[Test(ExpectedExceptionType=typeof(Exception), ShouldTestFail=true)]
+	public void Test_FailIf_ExpectedExceptionIsNotThrown() {
+		// Nothing to do, this test should fail because no exception was thrown
 	}
 }
+#endregion
 ```
 
 The output will be:
-![SeveralTestsResults](imgs/SeveralTestsResults.png)
+![SeveralTestsResults](imgs/MetaTesting_Results.png)
 
 ## Special Thanks
 I want to thank [TFV](http://www.tfv.pt) for getting me hooked on LinqPad and giving me the time to give back to the community.
 
 ## Future Work
-* Use attributes to mark functions as tests (like MSTest [TestMethod] attribute);
-* Create an Assert class/namespace to facilitate asserts (like every unit test framework has!);
-* Allow Tests to explicitly fail with an exception (like MSTest [ExpectedException] attribute);
+* ~~Use attributes to mark functions as tests (like MSTest [TestMethod] attribute);~~ :white_check_mark: v 0.0.2
+* ~~Create an Assert class/namespace to facilitate asserts (like every unit test framework has!);~~ :white_check_mark: v 0.0.2
+* ~~Allow Tests to explicitly fail with an exception (like MSTest [ExpectedException] attribute);~~ :white_check_mark: v 0.0.2
 * Come up with a way to capture the console output for each test separately;
+* Allow the usage of Task and async;
