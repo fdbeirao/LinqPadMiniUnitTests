@@ -2,7 +2,7 @@
 
 ///  Author: Fábio Beirão (fdblog -@at- gmail.com)
 ///  GitHub: https://github.com/fdbeirao/LinqPadMiniUnitTests
-/// Version: 0.0.3
+/// Version: 0.0.4
 
 public interface IUnitTests {}
 
@@ -90,7 +90,8 @@ public static class Tests {
 			if (failureReason == null) {
 				if (testResult.ShouldTestFail) {
 					testResult.TestOutcome.Content = "Success (not expected!)";
-					testResult.TestOutcome.Style = "color:red";				
+					testResult.TestOutcome.Style = "color:red";
+					atLeastOneTestFailed = true;
 				} else {
 					testResult.TestOutcome.Content = "Success";
 					testResult.TestOutcome.Style = "color:green";
@@ -102,6 +103,7 @@ public static class Tests {
 				} else {
 					testResult.TestOutcome.Content = "Failure";
 					testResult.TestOutcome.Style = "color:red";
+					atLeastOneTestFailed = true;
 				}
 			}
 		}
@@ -116,16 +118,22 @@ public static class Assert {
 		// if they are both null, they are equal
 		if (actual == null && expected == null) 
 			return;
-		if (actual == null || expected == null || actual.CompareTo(expected) != 0)
-			throw new AreEqualAssertException<T>(expectedValue: expected, actualValue: actual);
+		if (actual == null || expected == null || actual.CompareTo(expected) != 0) {
+			if (typeof(T) == typeof(string))
+				throw new AreEqualStringAssertException(expectedValue: expected as string, actualValue: actual as string);
+			else
+				throw new AreEqualAssertException<T>(expectedValue: expected, actualValue: actual);
+		}
 	}	
 	
 	public static void AreNotEqual<T>(T notExpected, T actual) where T : IComparable {
 		// if they are both null, they are equal
-		if (actual == null && notExpected == null)
-			throw new AreNotEqualAssertException<T>(notExpectedValue: notExpected, actualValue: actual);
-		if (actual != null && actual.CompareTo(notExpected) == 0)
-			throw new AreNotEqualAssertException<T>(notExpectedValue: notExpected, actualValue: actual);
+		if ((actual == null && notExpected == null) || (actual != null && actual.CompareTo(notExpected) == 0)) {
+			if (typeof(T) == typeof(string))
+				throw new AreNotEqualStringAssertException(notExpectedValue: notExpected as string, actualValue: actual as string);
+			else
+				throw new AreNotEqualAssertException<T>(notExpectedValue: notExpected, actualValue: actual);
+		}
 	}
 	
 	public static void Fail(string failReason) {
@@ -156,6 +164,23 @@ public static class Assert {
 		public T ActualValue { get; private set; }		
 	}
 	
+	internal class AreEqualStringAssertException : AreEqualAssertException<string> {
+		public AreEqualStringAssertException(string expectedValue, string actualValue) : base(expectedValue: expectedValue, actualValue: actualValue) {
+			if (expectedValue != null)
+				ExpectedValueBytes = Util.OnDemand("Get [ExpectedValue] bytes (UTF8)", () => ExpectedValue.GetStringBytes(Encoding.UTF8));
+			else
+				ExpectedValueBytes = new DumpContainer("null");
+			
+			if (actualValue != null)
+				ActualValueBytes = Util.OnDemand("Get [ActualValue] bytes (UTF8)", () => ActualValue.GetStringBytes(Encoding.UTF8));
+			else
+				ActualValueBytes = new DumpContainer("null");
+		}
+		
+		public DumpContainer ExpectedValueBytes { get; private set; }
+		public DumpContainer ActualValueBytes { get; private set; }
+	}
+	
 	internal class AreNotEqualAssertException<T> : AssertException {
 		public AreNotEqualAssertException(T notExpectedValue, T actualValue) : base("Assert.AreNotEqual failed") { 
 			NotExpectedValue = notExpectedValue;
@@ -164,6 +189,27 @@ public static class Assert {
 		
 		public T NotExpectedValue { get; private set; }		
 		public T ActualValue { get; private set; }		
+	}
+	
+	internal class AreNotEqualStringAssertException : AreNotEqualAssertException<string> {
+		public AreNotEqualStringAssertException(string notExpectedValue, string actualValue) : base(notExpectedValue: notExpectedValue, actualValue: actualValue) {
+			if (notExpectedValue != null)
+				NotExpectedValueBytes = Util.OnDemand("Get [NotExpectedValue] bytes (UTF8)", () => NotExpectedValue.GetStringBytes(Encoding.UTF8));
+			else
+				NotExpectedValueBytes = new DumpContainer("null");
+			
+			if (actualValue != null)
+				ActualValueBytes = Util.OnDemand("Get [ActualValue] bytes (UTF8)", () => ActualValue.GetStringBytes(Encoding.UTF8));
+			else
+				ActualValueBytes = new DumpContainer("null");
+		}
+		
+		public DumpContainer NotExpectedValueBytes { get; private set; }
+		public DumpContainer ActualValueBytes { get; private set; }
+	}
+	
+	internal static string GetStringBytes(this string inputString, Encoding encoding) {
+		return string.Join(" ", encoding.GetBytes(inputString).Select(chr => chr.ToString("000")));
 	}
 	
 	internal class AssertFailException : AssertException {
@@ -185,6 +231,7 @@ public static class Assert {
 		public Exception ThrownException { get; set; }
 		public Type ExpectedExceptionType { get; set; }
 	}
+	
 }
 
 #endregion
