@@ -6,7 +6,7 @@
 
 ///  Author: Fábio Beirão (fdblog -@at- gmail.com)
 ///  GitHub: https://github.com/fdbeirao/LinqPadMiniUnitTests
-/// Version: 0.0.3
+/// Version: 0.0.5
 
 public class Test_UnitTests : IUnitTests {
 	[Test]
@@ -27,6 +27,36 @@ public class Test_UnitTests : IUnitTests {
 		someString += "bar";
 		// Assert
 		Assert.AreNotEqual(notExpected: "xpto", actual: someString);
+	}
+	
+	[Test]
+	public void Test_IsTrue() {
+		Assert.IsTrue(true);
+	}
+	
+	[Test]
+	public void Test_IsTrue_Func() {
+		Assert.IsTrue(() => { return true; });
+	}
+	
+	[Test(ShouldTestFail=true)]
+	public void Test_IsTrue_Fail() {
+		Assert.IsTrue(false);
+	}
+	
+	[Test]
+	public void Test_IsFalse() {
+		Assert.IsFalse(false);
+	}
+	
+	[Test]
+	public void Test_IsFalse_Func() {
+		Assert.IsFalse(() => { return false; });
+	}
+	
+	[Test(ShouldTestFail=true)]
+	public void Test_IsFalse_Fail() {
+		Assert.IsFalse(true);
 	}
 	
 	[Test(ShouldTestFail=true)]

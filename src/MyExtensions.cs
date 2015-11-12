@@ -2,7 +2,7 @@
 
 ///  Author: Fábio Beirão (fdblog -@at- gmail.com)
 ///  GitHub: https://github.com/fdbeirao/LinqPadMiniUnitTests
-/// Version: 0.0.4
+/// Version: 0.0.5
 
 public interface IUnitTests {}
 
@@ -136,6 +136,24 @@ public static class Assert {
 		}
 	}
 	
+	public static void IsTrue(Func<bool> funcToAssert) {
+		IsTrue(funcToAssert());
+	}
+	
+	public static void IsTrue(bool value) {
+		if (true != value)
+			throw new IsTrueAssertException();
+	}
+	
+	public static void IsFalse(Func<bool> funcToAssert) {
+		IsFalse(funcToAssert());
+	}
+	
+	public static void IsFalse(bool value) {
+		if (false != value)
+			throw new IsFalseAssertException();
+	}
+	
 	public static void Fail(string failReason) {
 		throw new AssertFailException(failReason: failReason);
 	}
@@ -232,6 +250,13 @@ public static class Assert {
 		public Type ExpectedExceptionType { get; set; }
 	}
 	
+	internal class IsTrueAssertException : AssertException {
+		public IsTrueAssertException() : base("Assert.IsTrue failed") {}
+	}
+	
+	internal class IsFalseAssertException : AssertException {
+		public IsFalseAssertException() : base("Assert.IsFalse failed") {}
+	}
 }
 
 #endregion
